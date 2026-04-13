@@ -228,9 +228,9 @@ export default function WhyChooseUs() {
           {/* Bottom stats */}
           <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { value: '10+', label: 'Years Experience' },
-              { value: '200+', label: 'Happy Clients' },
-              { value: '15+', label: 'Industry Awards' },
+              { value: '5+', label: 'Years Experience' },
+              { value: '100+', label: 'Happy Clients' },
+              { value: '5+', label: 'Industry Awards' },
               { value: '24/7', label: 'Support Available' },
             ].map((stat, index) => (
               <div

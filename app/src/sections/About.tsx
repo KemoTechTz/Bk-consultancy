@@ -6,9 +6,9 @@ import { Award, Users, ThumbsUp, CheckCircle } from 'lucide-react';
 gsap.registerPlugin(ScrollTrigger);
 
 const stats = [
-  { icon: Award, value: 500, suffix: '+', label: 'Projects Completed' },
+  { icon: Award, value: 50, suffix: '+', label: 'Projects Completed' },
   { icon: Users, value: 50, suffix: '+', label: 'Expert Consultants' },
-  { icon: ThumbsUp, value: 98, suffix: '%', label: 'Client Satisfaction' },
+  { icon: ThumbsUp, value: 100, suffix: '%', label: 'Client Satisfaction' },
 ];
 
 const features = [
@@ -119,7 +119,7 @@ export default function About() {
               <div className="relative aspect-[4/5] max-w-lg mx-auto lg:mx-0">
                 {/* Animated blob background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-eco-500/20 to-eco-700/20 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] animate-pulse" />
-                
+
                 {/* Image */}
                 <div className="absolute inset-4 overflow-hidden rounded-[35%_65%_65%_35%/45%_45%_55%_55%]">
                   <img
@@ -153,12 +153,12 @@ export default function About() {
               <p className="text-eco-400 font-medium tracking-wider uppercase text-sm mb-4 opacity-0">
                 About Us
               </p>
-              
+
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-white mb-6 opacity-0">
                 Leading Environmental{' '}
                 <span className="text-gradient">Consultancy</span> in Tanzania
               </h2>
-              
+
               <p className="text-gray-300 text-lg mb-8 opacity-0">
                 With years of experience and a team of NEMC-certified experts, we provide
                 comprehensive environmental solutions that help businesses thrive while

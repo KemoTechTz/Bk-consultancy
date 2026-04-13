@@ -260,7 +260,7 @@ export default function Hero() {
             {/* Stats */}
             <div className="mt-16 grid grid-cols-3 gap-8">
               {[
-                { value: '500+', label: 'Projects Completed' },
+                { value: '50+', label: 'Projects Completed' },
                 { value: '50+', label: 'Expert Consultants' },
                 { value: '98%', label: 'Client Satisfaction' },
               ].map((stat, index) => (

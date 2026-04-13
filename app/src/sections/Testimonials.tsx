@@ -17,40 +17,15 @@ const testimonials = [
   },
   {
     id: 2,
-    name: 'Dr. Sarah Kimaro',
+    name: 'Dr. Jesca  Kimaro',
     role: 'Operations Director, TanzAgro Ltd',
     avatar: '/images/client-avatar.jpg',
     quote:
       'The air quality monitoring system they installed has been invaluable. Real-time data helps us make informed decisions and maintain compliance with environmental regulations.',
     rating: 5,
   },
-  {
-    id: 3,
-    name: 'James Mwinyi',
-    role: 'Project Manager, Dodoma Development Corp',
-    avatar: '/images/client-avatar.jpg',
-    quote:
-      'Professional, thorough, and always on time. BK Environmental has been our trusted partner for all environmental compliance needs. Their expertise is unmatched in Tanzania.',
-    rating: 5,
-  },
-  {
-    id: 4,
-    name: 'Grace Mushi',
-    role: 'Environmental Officer, Lake Oil',
-    avatar: '/images/client-avatar.jpg',
-    quote:
-      'Their environmental audit identified issues we didnt know existed. The remediation plan they developed saved us from potential regulatory penalties.',
-    rating: 5,
-  },
-  {
-    id: 5,
-    name: 'John Bwire',
-    role: 'Managing Director, Bwire Construction',
-    avatar: '/images/client-avatar.jpg',
-    quote:
-      'From EIA to ongoing monitoring, BK Environmental provides comprehensive support. Their team is knowledgeable, responsive, and genuinely cares about environmental protection.',
-    rating: 5,
-  },
+
+
 ];
 
 export default function Testimonials() {

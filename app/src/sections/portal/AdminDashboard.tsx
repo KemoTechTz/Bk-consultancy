@@ -82,7 +82,7 @@ const projectTypeData = [
 ];
 
 const recentUsers = [
-  { id: 1, name: 'Baraka Maleka', email: 'baraka@example.com', company: 'Maleka Industries', role: 'Client', status: 'active', joined: '2024-03-01' },
+  { id: 1, name: 'Baraka Maleka', email: 'barakamaleka@gmail.com', company: 'Maleka Industries', role: 'Client', status: 'active', joined: '2024-03-01' },
   { id: 2, name: 'Dr. Sarah Kimaro', email: 'sarah@bkenv.co.tz', company: 'BK Environmental', role: 'Consultant', status: 'active', joined: '2023-01-15' },
   { id: 3, name: 'James Mwinyi', email: 'james@example.com', company: 'Dodoma Dev Corp', role: 'Client', status: 'pending', joined: '2024-03-10' },
   { id: 4, name: 'Grace Mushi', email: 'grace@bkenv.co.tz', company: 'BK Environmental', role: 'Consultant', status: 'active', joined: '2022-06-20' },
