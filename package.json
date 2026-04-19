@@ -2,10 +2,6 @@
   "name": "bk-consultancy",
   "private": true,
   "version": "1.0.0",
-  "workspaces": [
-    "app",
-    "server"
-  ],
   "scripts": {
     "dev": "npm --prefix app run dev",
     "build": "npm --prefix app run build",
