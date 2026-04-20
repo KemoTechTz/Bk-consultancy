@@ -27,43 +27,43 @@ router.post('/login', async (req, res) => {
   }
 })
 
-router.post(
-  '/register',
-  async (req, res, next) => {
-    try {
-      const adminCount = await Admin.countDocuments()
+const requireBootstrapOrAdmin = async (req, res, next) => {
+  try {
+    const adminCount = await Admin.countDocuments()
 
-      if (adminCount === 0) {
-        return next()
-      }
-
-      return authenticateAdmin(req, res, next)
-    } catch (error) {
-      return res.status(500).json({ message: 'Unable to validate admin bootstrap state.', error: error.message })
+    if (adminCount === 0) {
+      return next()
     }
-  },
-  async (req, res) => {
-    try {
-      const { username, password } = req.body
 
-      if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required.' })
-      }
+    return authenticateAdmin(req, res, next)
+  } catch (error) {
+    return res.status(500).json({ message: 'Unable to validate admin bootstrap state.', error: error.message })
+  }
+}
 
-      const existingAdmin = await Admin.findOne({ username })
-      if (existingAdmin) {
-        return res.status(409).json({ message: 'Username is already taken.' })
-      }
+const registerAdmin = async (req, res) => {
+  try {
+    const { username, password } = req.body
 
-      const hash = await bcrypt.hash(password, 10)
-      const admin = new Admin({ username, password: hash })
-      await admin.save()
-
-      return res.status(201).json({ message: 'Admin created' })
-    } catch (error) {
-      return res.status(500).json({ message: 'Admin creation failed.', error: error.message })
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required.' })
     }
-  },
-)
+
+    const existingAdmin = await Admin.findOne({ username })
+    if (existingAdmin) {
+      return res.status(409).json({ message: 'Username is already taken.' })
+    }
+
+    const hash = await bcrypt.hash(password, 10)
+    const admin = new Admin({ username, password: hash })
+    await admin.save()
+
+    return res.status(201).json({ message: 'Admin created' })
+  } catch (error) {
+    return res.status(500).json({ message: 'Admin creation failed.', error: error.message })
+  }
+}
+
+router.post('/register', requireBootstrapOrAdmin, registerAdmin)
 
 export default router
