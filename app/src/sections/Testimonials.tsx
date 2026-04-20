@@ -17,7 +17,7 @@ const testimonials = [
   },
   {
     id: 2,
-    name: 'Dr. Jesca  Kimaro',
+    name: 'Dr. Regina ',
     role: 'Operations Director, TanzAgro Ltd',
     avatar: '/images/client-avatar.jpg',
     quote:
