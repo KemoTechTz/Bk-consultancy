@@ -43,7 +43,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { API_BASE_URL } from '@/config';
 import { getAdminAuthHeaders, getAdminToken } from '@/lib/admin-auth';
 
-
 import {
   LineChart,
   Line,
@@ -151,7 +150,7 @@ export default function AdminDashboard() {
   };
 
 
-  const getMutationHeaders = () => {
+  const getMutationHeaders = (): Record<string, string> | null => {
     const token = getAdminToken();
     if (!token) {
       setMessage('Admin session missing. Please log in again.');
