@@ -1,45 +1,69 @@
-import express from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import Admin from '../models/Admin.js';
+import express from 'express'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import Admin from '../models/Admin.js'
+import authenticateAdmin from '../middleware/authenticateAdmin.js'
 
-const router = express.Router();
+const router = express.Router()
 
-// Middleware to authenticate JWT
-const authenticateAdmin = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ message: 'Access denied. No token provided.' });
-
-  const token = authHeader.split(' ')[1]; // Bearer <token>
-  if (!token) return res.status(401).json({ message: 'Access denied. Invalid token format.' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.adminId = decoded.id;
-    next();
-  } catch (ex) {
-    res.status(400).json({ message: 'Invalid token.' });
-  }
-};
-
-// Admin login
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  const admin = await Admin.findOne({ username });
-  if (!admin) return res.status(401).json({ message: 'Invalid credentials' });
-  const isMatch = await bcrypt.compare(password, admin.password);
-  if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
-  const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-  res.json({ token });
-});
+  try {
+    const { username, password } = req.body
 
-// Add new admin (protected, for demo only)
-router.post('/register', authenticateAdmin, async (req, res) => {
-  const { username, password } = req.body;
-  const hash = await bcrypt.hash(password, 10);
-  const admin = new Admin({ username, password: hash });
-  await admin.save();
-  res.json({ message: 'Admin created' });
-});
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required.' })
+    }
 
-export default router;
+    const admin = await Admin.findOne({ username })
+    if (!admin) return res.status(401).json({ message: 'Invalid credentials' })
+
+    const isMatch = await bcrypt.compare(password, admin.password)
+    if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' })
+
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1d' })
+    return res.json({ token })
+  } catch (error) {
+    return res.status(500).json({ message: 'Login failed.', error: error.message })
+  }
+})
+
+router.post(
+  '/register',
+  async (req, res, next) => {
+    try {
+      const adminCount = await Admin.countDocuments()
+
+      if (adminCount === 0) {
+        return next()
+      }
+
+      return authenticateAdmin(req, res, next)
+    } catch (error) {
+      return res.status(500).json({ message: 'Unable to validate admin bootstrap state.', error: error.message })
+    }
+  },
+  async (req, res) => {
+    try {
+      const { username, password } = req.body
+
+      if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required.' })
+      }
+
+      const existingAdmin = await Admin.findOne({ username })
+      if (existingAdmin) {
+        return res.status(409).json({ message: 'Username is already taken.' })
+      }
+
+      const hash = await bcrypt.hash(password, 10)
+      const admin = new Admin({ username, password: hash })
+      await admin.save()
+
+      return res.status(201).json({ message: 'Admin created' })
+    } catch (error) {
+      return res.status(500).json({ message: 'Admin creation failed.', error: error.message })
+    }
+  },
+)
+
+export default router
