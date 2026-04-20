@@ -40,6 +40,7 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { API_BASE_URL } from '@/config';
 
 
 import {
@@ -144,7 +145,7 @@ export default function AdminDashboard() {
   const handleProjectSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/content/projects', {
+      const response = await fetch(`${API_BASE_URL}/content/projects`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...projectForm, outcomes: projectForm.outcomes.split('\n').filter(o => o.trim()) }),
@@ -156,6 +157,7 @@ export default function AdminDashboard() {
         setMessage('Failed to add project.');
       }
     } catch (error) {
+      console.error(error);
       setMessage('Error adding project.');
     }
   };
@@ -163,7 +165,7 @@ export default function AdminDashboard() {
   const handleBlogSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/content/blogs', {
+      const response = await fetch(`${API_BASE_URL}/content/blogs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...blogForm, date: new Date() }),
@@ -175,6 +177,7 @@ export default function AdminDashboard() {
         setMessage('Failed to add blog.');
       }
     } catch (error) {
+      console.error(error);
       setMessage('Error adding blog.');
     }
   };
@@ -182,7 +185,7 @@ export default function AdminDashboard() {
   const handleTestimonialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/content/testimonials', {
+      const response = await fetch(`${API_BASE_URL}/content/testimonials`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(testimonialForm),
@@ -194,6 +197,7 @@ export default function AdminDashboard() {
         setMessage('Failed to add testimonial.');
       }
     } catch (error) {
+      console.error(error);
       setMessage('Error adding testimonial.');
     }
   };
@@ -201,7 +205,7 @@ export default function AdminDashboard() {
   const handleServiceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/content/services', {
+      const response = await fetch(`${API_BASE_URL}/content/services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(serviceForm),
@@ -213,6 +217,7 @@ export default function AdminDashboard() {
         setMessage('Failed to add service.');
       }
     } catch (error) {
+      console.error(error);
       setMessage('Error adding service.');
     }
   };
