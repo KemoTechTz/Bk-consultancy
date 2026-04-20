@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -40,6 +40,7 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { API_BASE_URL } from '@/config';
 
 
 import {
@@ -55,46 +56,17 @@ import {
   Cell,
 } from 'recharts';
 
-// Mock data
-const stats = {
-  totalUsers: 156,
-  activeProjects: 42,
-  completedProjects: 238,
-  pendingConsultations: 18,
-  monthlyRevenue: 45000000,
-  revenueGrowth: 12,
-};
-
-const revenueData = [
-  { month: 'Jan', revenue: 32000000 },
-  { month: 'Feb', revenue: 35000000 },
-  { month: 'Mar', revenue: 38000000 },
-  { month: 'Apr', revenue: 36000000 },
-  { month: 'May', revenue: 42000000 },
-  { month: 'Jun', revenue: 45000000 },
-];
-
-const projectTypeData = [
-  { name: 'EIA', value: 35, color: '#4ade80' },
-  { name: 'Audit', value: 25, color: '#22c55e' },
-  { name: 'Monitoring', value: 20, color: '#3b82f6' },
-  { name: 'Other', value: 20, color: '#f59e0b' },
-];
-
-const recentUsers = [
-  { id: 1, name: 'Baraka Maleka', email: 'barakamaleka@gmail.com', company: 'Maleka Industries', role: 'Client', status: 'active', joined: '2024-03-01' },
-  { id: 2, name: 'Dr. Sarah Kimaro', email: 'sarah@bkenv.co.tz', company: 'BK Environmental', role: 'Consultant', status: 'active', joined: '2023-01-15' },
-  { id: 3, name: 'James Mwinyi', email: 'james@example.com', company: 'Dodoma Dev Corp', role: 'Client', status: 'pending', joined: '2024-03-10' },
-  { id: 4, name: 'Grace Mushi', email: 'grace@bkenv.co.tz', company: 'BK Environmental', role: 'Consultant', status: 'active', joined: '2022-06-20' },
-  { id: 5, name: 'John Bwire', email: 'john@example.com', company: 'Lake Oil', role: 'Client', status: 'active', joined: '2024-02-28' },
-];
-
-const recentProjects = [
-  { id: 1, name: 'Dodoma Industrial Park EIA', client: 'Maleka Industries', type: 'EIA', status: 'in_progress', progress: 75 },
-  { id: 2, name: 'Air Quality Monitoring Setup', client: 'City Council', type: 'Monitoring', status: 'completed', progress: 100 },
-  { id: 3, name: 'Annual Environmental Audit', client: 'Lake Oil', type: 'Audit', status: 'pending_review', progress: 90 },
-  { id: 4, name: 'Waste Management Plan', client: 'TanzAgro Ltd', type: 'EPP', status: 'in_progress', progress: 45 },
-];
+interface DashboardProject {
+  id?: string
+  _id?: string
+  name?: string
+  title?: string
+  type?: string
+  category?: string
+  status?: string
+  progress?: number
+  location?: string
+}
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Dashboard', id: 'dashboard' },
@@ -116,6 +88,43 @@ export default function AdminDashboard() {
   const [testimonialForm, setTestimonialForm] = useState({ name: '', content: '', company: '' });
   const [serviceForm, setServiceForm] = useState({ name: '', description: '' });
   const [message, setMessage] = useState('');
+
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ totalUsers: 0, activeProjects: 0, completedProjects: 0, pendingConsultations: 0, monthlyRevenue: 0, revenueGrowth: 0 });
+  const [revenueData, setRevenueData] = useState<Array<{ month: string; revenue: number }>>([]);
+  const [projectTypeData, setProjectTypeData] = useState<Array<{ name: string; value: number; color: string }>>([]);
+  const [recentUsers, setRecentUsers] = useState<Array<{ id: string; name: string; email: string; company: string; role: string; status: string; joined: string }>>([]);
+  const [recentProjects, setRecentProjects] = useState<Array<{ id: string; name: string; type: string; status: string; progress: number; client?: string }>>([]);
+
+  const refreshDashboard = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/dashboard/portal-data`);
+      if (!response.ok) throw new Error('Failed to load dashboard data');
+      const data = await response.json();
+      setStats(data.stats || { totalUsers: 0, activeProjects: 0, completedProjects: 0, pendingConsultations: 0, monthlyRevenue: 0, revenueGrowth: 0 });
+      setRevenueData(data.revenueData || []);
+      setProjectTypeData(data.projectTypeData || []);
+      setRecentUsers(data.recentUsers || []);
+      setRecentProjects((data.recentProjects || []).map((project: DashboardProject) => ({
+        id: project.id || project._id,
+        name: project.name || project.title,
+        type: project.type || project.category || 'General',
+        status: project.status || 'in_progress',
+        progress: project.progress || 0,
+        client: project.location || 'Client',
+      })));
+    } catch (error) {
+      console.error(error);
+      setMessage('Unable to load live admin data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshDashboard();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -144,7 +153,7 @@ export default function AdminDashboard() {
   const handleProjectSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/content/projects', {
+      const response = await fetch(`${API_BASE_URL}/content/projects`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...projectForm, outcomes: projectForm.outcomes.split('\n').filter(o => o.trim()) }),
@@ -152,10 +161,12 @@ export default function AdminDashboard() {
       if (response.ok) {
         setMessage('Project added successfully!');
         setProjectForm({ title: '', description: '', image: '', link: '', location: '', date: '', category: '', outcomes: '' });
+        refreshDashboard();
       } else {
         setMessage('Failed to add project.');
       }
     } catch (error) {
+      console.error(error);
       setMessage('Error adding project.');
     }
   };
@@ -163,7 +174,7 @@ export default function AdminDashboard() {
   const handleBlogSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/content/blogs', {
+      const response = await fetch(`${API_BASE_URL}/content/blogs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...blogForm, date: new Date() }),
@@ -171,10 +182,12 @@ export default function AdminDashboard() {
       if (response.ok) {
         setMessage('Blog added successfully!');
         setBlogForm({ title: '', content: '', author: '' });
+        refreshDashboard();
       } else {
         setMessage('Failed to add blog.');
       }
     } catch (error) {
+      console.error(error);
       setMessage('Error adding blog.');
     }
   };
@@ -182,7 +195,7 @@ export default function AdminDashboard() {
   const handleTestimonialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/content/testimonials', {
+      const response = await fetch(`${API_BASE_URL}/content/testimonials`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(testimonialForm),
@@ -190,10 +203,12 @@ export default function AdminDashboard() {
       if (response.ok) {
         setMessage('Testimonial added successfully!');
         setTestimonialForm({ name: '', content: '', company: '' });
+        refreshDashboard();
       } else {
         setMessage('Failed to add testimonial.');
       }
     } catch (error) {
+      console.error(error);
       setMessage('Error adding testimonial.');
     }
   };
@@ -201,7 +216,7 @@ export default function AdminDashboard() {
   const handleServiceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/content/services', {
+      const response = await fetch(`${API_BASE_URL}/content/services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(serviceForm),
@@ -209,16 +224,19 @@ export default function AdminDashboard() {
       if (response.ok) {
         setMessage('Service added successfully!');
         setServiceForm({ name: '', description: '' });
+        refreshDashboard();
       } else {
         setMessage('Failed to add service.');
       }
     } catch (error) {
+      console.error(error);
       setMessage('Error adding service.');
     }
   };
 
   const renderDashboard = () => (
     <div className="space-y-6">
+      {loading && <div className="text-sm text-gray-300">Loading live dashboard data...</div>}
       {/* Stats Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-[#0f2e15] border-eco-500/20">
@@ -520,17 +538,32 @@ export default function AdminDashboard() {
         <main className="flex-1 p-4 lg:p-6 min-h-[calc(100vh-4rem)]">
           {activeTab === 'dashboard' && renderDashboard()}
           {activeTab === 'users' && (
-            <div className="text-center py-20">
-              <Users className="w-16 h-16 text-eco-400 mx-auto mb-4" />
+            <div className="space-y-3">
               <h2 className="text-2xl font-heading font-bold text-white mb-2">User Management</h2>
-              <p className="text-gray-400">Full user management coming soon...</p>
+              {recentUsers.map((user) => (
+                <div key={user.id} className="p-4 rounded-xl bg-[#0f2e15] border border-eco-500/20">
+                  <p className="text-white font-medium">{user.name}</p>
+                  <p className="text-sm text-gray-400">{user.email} • {user.company}</p>
+                </div>
+              ))}
+              {!recentUsers.length && <p className="text-gray-400">No users found.</p>}
             </div>
           )}
           {activeTab === 'projects' && (
-            <div className="text-center py-20">
-              <FolderKanban className="w-16 h-16 text-eco-400 mx-auto mb-4" />
+            <div className="space-y-3">
               <h2 className="text-2xl font-heading font-bold text-white mb-2">Project Management</h2>
-              <p className="text-gray-400">Full project management coming soon...</p>
+              {recentProjects.map((project) => (
+                <div key={project.id} className="p-4 rounded-xl bg-[#0f2e15] border border-eco-500/20">
+                  <div className="flex justify-between">
+                    <div>
+                      <p className="text-white font-medium">{project.name}</p>
+                      <p className="text-sm text-gray-400">{project.type} • {project.client}</p>
+                    </div>
+                    <Badge className={getStatusColor(project.status)}>{project.status.replace('_', ' ')}</Badge>
+                  </div>
+                </div>
+              ))}
+              {!recentProjects.length && <p className="text-gray-400">No projects found.</p>}
             </div>
           )}
           {activeTab === 'content' && (
@@ -720,25 +753,21 @@ export default function AdminDashboard() {
               </Tabs>
             </div>
           )}
-          {activeTab === 'analytics' && (
-            <div className="text-center py-20">
-              <BarChart3 className="w-16 h-16 text-eco-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-heading font-bold text-white mb-2">Analytics</h2>
-              <p className="text-gray-400">Detailed analytics coming soon...</p>
-            </div>
-          )}
+          {activeTab === 'analytics' && renderDashboard()}
           {activeTab === 'messages' && (
-            <div className="text-center py-20">
-              <MessageSquare className="w-16 h-16 text-eco-400 mx-auto mb-4" />
+            <div className="space-y-3">
               <h2 className="text-2xl font-heading font-bold text-white mb-2">Messages</h2>
-              <p className="text-gray-400">Message management coming soon...</p>
+              {recentUsers.slice(0, 4).map((user) => (
+                <div key={user.id} className="p-4 rounded-xl bg-[#0f2e15] border border-eco-500/20 text-gray-300">
+                  Follow up with {user.name} regarding active portal updates.
+                </div>
+              ))}
+              {!recentUsers.length && <p className="text-gray-400">No messages available.</p>}
             </div>
           )}
           {activeTab === 'settings' && (
-            <div className="text-center py-20">
-              <Settings className="w-16 h-16 text-eco-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-heading font-bold text-white mb-2">Settings</h2>
-              <p className="text-gray-400">System settings coming soon...</p>
+            <div className="p-4 rounded-xl bg-[#0f2e15] border border-eco-500/20 text-gray-300">
+              Settings are managed through environment configuration and role permissions.
             </div>
           )}
         </main>
