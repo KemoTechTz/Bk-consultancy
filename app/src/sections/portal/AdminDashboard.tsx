@@ -149,7 +149,6 @@ export default function AdminDashboard() {
     }).format(amount);
   };
 
-
   const getMutationHeaders = (): Record<string, string> | null => {
     const token = getAdminToken();
     if (!token) {
